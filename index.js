@@ -57,7 +57,7 @@ client.on("messageCreate", async (message) => {
     // 🚫 Rule 1: No Pinging — never allow pings
     if (member.roles.cache.some(r => r.name === NO_PING_ROLE)) {
       newContent = newContent.replace(
-        new RegExp(`<@!?${user.id}>`, "g"),
+        new RegExp(`<@!?${user.username}>`, "g"),
         `@${user.username}`
       );
       modified = true;
@@ -70,7 +70,7 @@ client.on("messageCreate", async (message) => {
       const status = member.presence?.status || "offline";
       if (status !== "online") {
         newContent = newContent.replace(
-          new RegExp(`<@!?${user.id}>`, "g"),
+          new RegExp(`<@!?${user.username}>`, "g"),
           `@${user.username}`
         );
         modified = true;
@@ -96,7 +96,7 @@ client.on("messageCreate", async (message) => {
     // 📩 DM the author privately
     try {
       const reasonList = blockedUsers.join(", ");
-      const dmMsg = `⚠️ Hey ${message.author.username}! Your message has been modified to not ping ${reasonList} in **${guild.name}**.\n\nThose users either have their settings set to "No Ping" or "Ping if Online" but they are not online right now.`;
+      const dmMsg = `⚠️ Hey ${message.author.username}! Your message has been modified to not ping ${reasonList} in **${guild.name}**.\n\nThose users either have their settings set to "No Ping" or they are set to "Ping if Online" and are not online right now.`;
       await message.author.send(dmMsg);
     } catch (err) {
       console.log(`❌ Could not DM ${message.author.username}: ${err.message}`);

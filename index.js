@@ -80,10 +80,18 @@ client.on("messageCreate", async (message) => {
   }
 
   if (modified) {
-    console.log("Editing message:", message.content, "->", newContent);
-    await message.edit({ content: newContent, allowedMentions: { parse: [] } }).catch(err => {
-      console.log("Failed to edit message:", err);
-    });
+    try {
+      // Delete the original message
+      await message.delete();
+
+      // Repost modified content
+      await message.channel.send({
+        content: newContent + `\n⚠️ Edited to remove pings for restricted users. (originally by ${message.author})`,
+        allowedMentions: { parse: [] } // prevents accidental pings
+      });
+    } catch (err) {
+      console.log("Failed to delete/repost message:", err);
+    }
 
     // 📩 DM the author privately
     try {

@@ -84,7 +84,6 @@ client.on("messageCreate", async (message) => {
     await message.edit({ content: newContent, allowedMentions: { parse: [] } }).catch(err => {
       console.log("Failed to edit message:", err);
     });
-  }
 
     // 📩 DM the author privately
     try {

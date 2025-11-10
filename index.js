@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
+import { createServer } from "http";
 
 const client = new Client({
   intents: [
@@ -97,3 +98,11 @@ client.on("messageCreate", async (message) => {
 });
 
 client.login(process.env.BOT_TOKEN || "YOUR_BOT_TOKEN");
+
+const port = process.env.PORT || 3000;
+createServer((req, res) => {
+  res.writeHead(200);
+  res.end("Bot is running!");
+}).listen(port, () => {
+  console.log(`🌐 Web server running on port ${port}`);
+});

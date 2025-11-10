@@ -57,11 +57,11 @@ client.on("messageCreate", async (message) => {
     // 🚫 Rule 1: No Pinging — never allow pings
     if (member.roles.cache.some(r => r.name === NO_PING_ROLE)) {
       newContent = newContent.replace(
-        new RegExp(`<@!?${user.username}>`, "g"),
-        `@${user.username}`
+        new RegExp(`<@!?${user.id}>`, "g"),
+        `@${member.displayName}`
       );
       modified = true;
-      blockedUsers.push(`${user.username} (No Pinging)`);
+      blockedUsers.push(`${member.displayName} (No Pinging)`);
       continue;
     }
 
@@ -70,11 +70,11 @@ client.on("messageCreate", async (message) => {
       const status = member.presence?.status || "offline";
       if (status !== "online") {
         newContent = newContent.replace(
-          new RegExp(`<@!?${user.username}>`, "g"),
-          `@${user.username}`
+          new RegExp(`<@!?${user.id}>`, "g"),
+          `@${member.displayName}`
         );
         modified = true;
-        blockedUsers.push(`${user.username} (not online)`);
+        blockedUsers.push(`${member.displayName} (Ping if Online)`);
       }
     }
   }

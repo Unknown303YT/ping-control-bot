@@ -80,11 +80,11 @@ client.on("messageCreate", async (message) => {
   }
 
   if (modified) {
-    // ✏️ Edit original message to remove pings
-    await message.edit({
-      content: newContent,
-      allowedMentions: { parse: [] }
-    }).catch(() => {});
+    console.log("Editing message:", message.content, "->", newContent);
+    await message.edit({ content: newContent, allowedMentions: { parse: [] } }).catch(err => {
+      console.log("Failed to edit message:", err);
+    });
+  }
 
     // 📩 DM the author privately
     try {

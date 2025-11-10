@@ -17,7 +17,7 @@ const NO_PING_ROLE = "No Ping";
 const CAN_PING_IF_ONLINE_ROLE = "Ping If Online";
 const MOD_BYPASS_ROLE = "Cool++"; // Mods won't have their pings restricted
 
-client.on("ready", () => {
+client.on("clientReady", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 

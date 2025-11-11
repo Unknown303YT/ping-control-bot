@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials } from "discord.js";
+import { Client, GatewayIntentBits, Partials, SlashCommandBuilder } from "discord.js";
 import { createServer } from "http";
 import { createClient } from '@supabase/supabase-js'
 

@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { createServer } from "http";
+import { createClient } from '@supabase/supabase-js'
 
 const client = new Client({
   intents: [
@@ -12,10 +13,68 @@ const client = new Client({
   partials: [Partials.Channel]
 });
 
-// 🏷️ Role names — must match your server exactly
-const NO_PING_ROLE = "No Ping";
-const CAN_PING_IF_ONLINE_ROLE = "Ping If Online";
-const MOD_BYPASS_ROLE = "Cool++"; // Mods won't have their pings restricted
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+// Save role config
+export async function saveGuildConfig(guildId, roleType, roleName) {
+  const { error } = await supabase
+    .from("guild_config")
+    .upsert({ guild_id: guildId, role_type: roleType, role_name: roleName });
+
+  if (error) console.error("Supabase save error:", error);
+}
+
+// Fetch role config
+export async function getGuildConfig(guildId) {
+  const { data, error } = await supabase
+    .from("guild_config")
+    .select("*")
+    .eq("guild_id", guildId);
+
+  if (error) {
+    console.error("Supabase fetch error:", error);
+    return {};
+  }
+
+  const config = {};
+  data.forEach(row => {
+    config[row.role_type] = row.role_name;
+  });
+  return config;
+}
+
+const setRolesCommand = new SlashCommandBuilder()
+  .setName("setroles")
+  .setDescription("Configure role names for this server")
+  .addStringOption(option =>
+    option.setName("role_type")
+      .setDescription("Which role type to configure")
+      .setRequired(true)
+      .addChoices(
+        { name: "No Ping", value: "NO_PING_ROLE" },
+        { name: "Ping If Online", value: "CAN_PING_IF_ONLINE_ROLE" },
+        { name: "Mod Bypass", value: "MOD_BYPASS_ROLE" }
+      )
+  )
+  .addRoleOption(option =>
+    option.setName("role")
+      .setDescription("Select a role from this server")
+      .setRequired(true)
+  );
+
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+  if (interaction.commandName === "setroles") {
+    const roleType = interaction.options.getString("role_type");
+    const role = interaction.options.getRole("role");
+
+    await saveGuildConfig(interaction.guild.id, roleType, role.name);
+
+    await interaction.reply(`✅ Set ${roleType} to **${role.name}** for this server.`);
+  }
+});
 
 client.on("clientReady", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
@@ -28,6 +87,14 @@ client.on("messageCreate", async (message) => {
   const guild = message.guild;
   const memberAuthor = await guild.members.fetch(message.author.id).catch(() => null);
   if (!memberAuthor) return;
+
+  // Load config for this guild
+  const config = await getGuildConfig(message.guild.id);
+
+  // Fallbacks if no config set yet
+  const NO_PING_ROLE = config.NO_PING_ROLE || "No Ping";
+  const CAN_PING_IF_ONLINE_ROLE = config.CAN_PING_IF_ONLINE_ROLE || "Ping If Online";
+  const MOD_BYPASS_ROLE = config.MOD_BYPASS_ROLE || "Moderator";
 
   // 🔒 Skip restrictions if author has the mod role
   if (memberAuthor.roles.cache.some(r => r.name === MOD_BYPASS_ROLE)) {

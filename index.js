@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials, SlashCommandBuilder } from "discord.js";
+import { Client, GatewayIntentBits, Partials, SlashCommandBuilder, REST, Routes } from "discord.js";
 import { createServer } from "http";
 import { createClient } from '@supabase/supabase-js'
 
@@ -16,6 +16,26 @@ const client = new Client({
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
+
+const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
+
+async function registerCommands() {
+  const commands = [setRolesCommand.toJSON()];
+
+  try {
+    console.log("🌀 Registering slash commands...");
+    await rest.put(
+      // 👇 replace with your own IDs
+      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+      { body: commands }
+    );
+    console.log("✅ Slash commands registered!");
+  } catch (error) {
+    console.error("❌ Error registering commands:", error);
+  }
+}
+
+await registerCommands();
 
 // Save role config
 export async function saveGuildConfig(guildId, roleType, roleName) {

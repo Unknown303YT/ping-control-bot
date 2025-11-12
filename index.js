@@ -130,20 +130,16 @@ client.on("messageCreate", async (message) => {
   let newContent = message.content;
   const blockedUsers = [];
 
+  // Check if @everyone or @here is mentioned
+  if (message.mentions.everyone || message.mentions.here) {
+    newContent = newContent.replace(/@everyone/g, "@everyone").replace(/@here/g, "@here");
+    modified = true;
+    blockedUsers.push("@everyone / @here");
+  }
+
   for (const [, user] of mentions) {
     const member = await guild.members.fetch(user.id).catch(() => null);
     if (!member) continue;
-
-    // Check if @everyone or @here is mentioned
-    if (message.mentions.everyone || message.mentions.here) {
-      // Only block if the sender is not a mod
-      if (!memberAuthor.roles.cache.some(r => r.name === MOD_BYPASS_ROLE)) {
-        // Replace actual ping with plain text so it doesn’t notify anyone
-        newContent = newContent.replace(/@everyone/g, "@everyone").replace(/@here/g, "@here");
-        modified = true;
-        blockedUsers.push("@everyone / @here");
-      }
-    }
 
     // 🚫 Rule 1: No Pinging — never allow pings
     if (member.roles.cache.some(r => r.name === NO_PING_ROLE)) {

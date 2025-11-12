@@ -19,24 +19,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
 
-async function registerCommands() {
-  const commands = [setRolesCommand.toJSON()];
-
-  try {
-    console.log("🌀 Registering slash commands...");
-    await rest.put(
-      // 👇 replace with your own IDs
-      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
-      { body: commands }
-    );
-    console.log("✅ Slash commands registered!");
-  } catch (error) {
-    console.error("❌ Error registering commands:", error);
-  }
-}
-
-await registerCommands();
-
 // Save role config
 export async function saveGuildConfig(guildId, roleType, roleName) {
   const { error } = await supabase
@@ -83,6 +65,24 @@ const setRolesCommand = new SlashCommandBuilder()
       .setDescription("Select a role from this server")
       .setRequired(true)
   );
+
+async function registerCommands() {
+  const commands = [setRolesCommand.toJSON()];
+
+  try {
+    console.log("🌀 Registering slash commands...");
+    await rest.put(
+      // 👇 replace with your own IDs
+      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+      { body: commands }
+    );
+    console.log("✅ Slash commands registered!");
+  } catch (error) {
+    console.error("❌ Error registering commands:", error);
+  }
+}
+
+await registerCommands();
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;

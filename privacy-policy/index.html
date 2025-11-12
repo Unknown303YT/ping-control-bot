@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ping Control Privacy Policy</title>
+</head>
+<body>
+  <h1>Privacy Policy for Ping Control</h1>
+  <pre id="policy"></pre>
+
+  <script>
+    fetch('PRIVACY POLICY')
+      .then(response => response.text())
+      .then(text => {
+        document.getElementById('policy').textContent = text;
+      });
+  </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials, SlashCommandBuilder, REST, Routes } from "discord.js";
+import { Client, GatewayIntentBits, Partials, SlashCommandBuilder, REST, Routes, PermissionFlagsBits } from "discord.js";
 import { createServer } from "http";
 import { createClient } from '@supabase/supabase-js'
 
@@ -65,7 +65,7 @@ const setRolesCommand = new SlashCommandBuilder()
       .setDescription("Select a role from this server")
       .setRequired(true)
   )
-  .setDefaultMemberPermissions(PermissionFlagBits.Administrator)
+  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .setDMPermission(false);
 
 async function registerCommands(guild) {

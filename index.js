@@ -97,9 +97,9 @@ client.on("interactionCreate", async (interaction) => {
 client.on("clientReady", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
-  for (const guild of client.guilds.cache.values()) {
-    await registerCommands(guild);
-  }
+  client.guilds.cache.forEach(guild => {
+    registerCommands(guild);
+  })
 });
 
 client.on("messageCreate", async (message) => {

@@ -66,14 +66,14 @@ const setRolesCommand = new SlashCommandBuilder()
       .setRequired(true)
   );
 
-async function registerCommands() {
+async function registerCommands(guild) {
   const commands = [setRolesCommand.toJSON()];
 
   try {
     console.log("🌀 Registering slash commands...");
     await rest.put(
       // 👇 replace with your own IDs
-      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+      Routes.applicationGuildCommands(client.user.id, guild.id),
       { body: commands }
     );
     console.log("✅ Slash commands registered!");
@@ -81,8 +81,6 @@ async function registerCommands() {
     console.error("❌ Error registering commands:", error);
   }
 }
-
-await registerCommands();
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
@@ -98,6 +96,9 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("clientReady", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
+
+  client.guilds.cache.forEach(guild => {
+    await registerCommands(guild);
 });
 
 client.on("messageCreate", async (message) => {

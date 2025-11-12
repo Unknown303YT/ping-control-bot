@@ -64,7 +64,9 @@ const setRolesCommand = new SlashCommandBuilder()
     option.setName("role")
       .setDescription("Select a role from this server")
       .setRequired(true)
-  );
+  )
+  .setDefaultMemberPermissions(PermissionFlagBits.Administrator)
+  .setDMPermission(false);
 
 async function registerCommands(guild) {
   const commands = [setRolesCommand.toJSON()];

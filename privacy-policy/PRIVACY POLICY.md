@@ -1,5 +1,4 @@
-# This Privacy Policy governs the collection, use, and sharing of personal information by Ping Control, a Discord bot developed by Unknown_303.
-# By using Ping Control, you agree to the terms of this Privacy Policy.
+# This Privacy Policy governs the collection, use, and sharing of personal information by Ping Control, a Discord bot developed by Unknown_303. By using Ping Control, you agree to the terms of this Privacy Policy.
 
 ## Information We Collect
 

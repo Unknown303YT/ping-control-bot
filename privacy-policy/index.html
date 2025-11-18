@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ping Control Privacy Policy</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <h1>Privacy Policy for Ping Control</h1>
+  <div id="policy"></div>
+  <script>
+    fetch('PRIVACY POLICY.md')
+      .then(response => response.text())
+      .then(text => {
+        // Convert markdown to HTML
+        const html = marked.parse(text);
+        // Insert into the page
+        document.getElementById('policy').innerHTML = html;
+      });
+  </script>
+</body>
+</html>

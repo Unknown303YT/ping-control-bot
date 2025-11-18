@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials, SlashCommandBuilder } from "discord.js";
+import { Client, GatewayIntentBits, Partials, SlashCommandBuilder, REST, Routes, PermissionFlagsBits } from "discord.js";
 import { createServer } from "http";
 import { createClient } from '@supabase/supabase-js'
 
@@ -16,6 +16,8 @@ const client = new Client({
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
+
+const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
 
 // Save role config
 export async function saveGuildConfig(guildId, roleType, roleName) {
@@ -62,7 +64,25 @@ const setRolesCommand = new SlashCommandBuilder()
     option.setName("role")
       .setDescription("Select a role from this server")
       .setRequired(true)
-  );
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+  .setDMPermission(false);
+
+async function registerCommands(guild) {
+  const commands = [setRolesCommand.toJSON()];
+
+  try {
+    console.log("🌀 Registering slash commands...");
+    await rest.put(
+      // 👇 replace with your own IDs
+      Routes.applicationGuildCommands(client.user.id, guild.id),
+      { body: commands }
+    );
+    console.log("✅ Slash commands registered!");
+  } catch (error) {
+    console.error("❌ Error registering commands:", error);
+  }
+}
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
@@ -78,6 +98,10 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("clientReady", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
+
+  client.guilds.cache.forEach(guild => {
+    registerCommands(guild);
+  })
 });
 
 client.on("messageCreate", async (message) => {
@@ -106,20 +130,16 @@ client.on("messageCreate", async (message) => {
   let newContent = message.content;
   const blockedUsers = [];
 
+  // Check if @everyone or @here is mentioned
+  if (message.mentions.everyone || message.mentions.here) {
+    newContent = newContent.replace(/@everyone/g, "@everyone").replace(/@here/g, "@here");
+    modified = true;
+    blockedUsers.push("@everyone / @here");
+  }
+
   for (const [, user] of mentions) {
     const member = await guild.members.fetch(user.id).catch(() => null);
     if (!member) continue;
-
-    // Check if @everyone or @here is mentioned
-    if (message.mentions.everyone || message.mentions.here) {
-      // Only block if the sender is not a mod
-      if (!memberAuthor.roles.cache.some(r => r.name === MOD_BYPASS_ROLE)) {
-        // Replace actual ping with plain text so it doesn’t notify anyone
-        newContent = newContent.replace(/@everyone/g, "@everyone").replace(/@here/g, "@here");
-        modified = true;
-        blockedUsers.push("@everyone / @here");
-      }
-    }
 
     // 🚫 Rule 1: No Pinging — never allow pings
     if (member.roles.cache.some(r => r.name === NO_PING_ROLE)) {
@@ -163,7 +183,8 @@ client.on("messageCreate", async (message) => {
     // 📩 DM the author privately
     try {
       const reasonList = blockedUsers.join(", ");
-      const dmMsg = `⚠️ Hey ${message.author.username}! Your message has been modified to not ping ${reasonList} in **${guild.name}**.\n\nThose users either have their settings set to "No Ping" or they are set to "Ping if Online" and are not online right now.`;
+      const name = message.author.globalName || message.author.username;
+      const dmMsg = `⚠️ Hey ${name}! Your message has been modified to not ping ${reasonList} in **${guild.name}**.\n\nThose users either have their settings set to "No Ping" or they are set to "Ping if Online" and are not online right now.`;
       await message.author.send(dmMsg);
     } catch (err) {
       console.log(`❌ Could not DM ${message.author.username}: ${err.message}`);
